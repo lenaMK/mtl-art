@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="prefs"
+    android:title="@string/app_name">
+    <PreferenceCategory
+        android:key="miseajour"
+        android:title="Mise à jour"
+        android:layout="@xml/preferences_category">
+          <CheckBoxPreference
+              android:key="autoupdate"
+            android:title="Action"
+            android:summary="Mettre à jour la base de données "/>
+
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
