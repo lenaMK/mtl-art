@@ -44,7 +44,7 @@ public class ListViewCursorAdaptor extends SimpleCursorAdapter {
         if (inView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            inView = inflater.inflate(R.layout.rangee, null);
+            inView = inflater.inflate(R.layout.rangee_dist, null);
         }
 
         TextView tv_title = (TextView)inView.findViewById(R.id.rangee_title);
@@ -55,11 +55,16 @@ public class ListViewCursorAdaptor extends SimpleCursorAdapter {
         String titre = c.getString(c.getColumnIndex(dbh.O_TITRE));
         String num_quartier = c.getString(c.getColumnIndex(dbh.O_QUARTIER));
         String quartier = dbh.retourneNom(dbh.TABLE_QUARTIERS, dbh.Q_ID, num_quartier, dbh.Q_NOM);
-        final String date = c.getString(c.getColumnIndex(dbh.O_DATE_IMAGE));
+
+        //montrer la date de la photo, plutôt pour la galerie qu'ici
+        //final String date = c.getString(c.getColumnIndex(dbh.O_DATE_IMAGE));
 
         tv_title.setText(titre);
-        tv_sub.setText(quartier);
+        tv_sub.setText(quartier);        //set distance instead if known ("distance:"+dist+" km")
 
+
+
+        //set icon in function of state
         final String etat = c.getString(c.getColumnIndex(dbh.O_ETAT));
         final String id = c.getString(c.getColumnIndex(dbh.O_ID));
 

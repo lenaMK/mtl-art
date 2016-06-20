@@ -47,8 +47,8 @@ public class MapFragment extends Fragment implements LocationListener, View.OnCl
 
 
     //attention, ces coordonnées existent donc si c'est le cas il y aura un bug
-    double lati = 0;
-    double longi = 0;
+    public double lati = 0;
+    public double longi = 0;
 
     double mtl_lati;
     double mtl_longi;

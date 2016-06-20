@@ -16,8 +16,8 @@ public class ListViewActivity extends Activity {
 
     DBHelper dbh;
 
-    String loc_longi;
-    String loc_lati;
+    String user_longi;
+    String user_lati;
     RadioButton rb_dist;
     RadioButton rb_quart;
 
@@ -31,12 +31,12 @@ public class ListViewActivity extends Activity {
 
         //get data for user location
         Intent intent = getIntent();
-        loc_longi = intent.getStringExtra("Geo_longi");
-        loc_lati = intent.getStringExtra("Geo_lati");
+        user_longi = intent.getStringExtra("Geo_longi");
+        user_lati = intent.getStringExtra("Geo_lati");
 
         //for debug
-        Log.d("ListView gps", "Longitude utilisateur = "+loc_longi);
-        Log.d("ListView gps", "Latitude utilisateur = " + loc_lati);
+        Log.d("ListView gps", "Longitude utilisateur = "+user_longi);
+        Log.d("ListView gps", "Latitude utilisateur = " + user_lati);
 
         //set View
         setContentView(R.layout.listview);
@@ -48,8 +48,10 @@ public class ListViewActivity extends Activity {
 
         /*
                Need to set up the RadioButtons!
+
                By default, have distance set.
                     if the person doesn't have location active, notify and set by neighbourhood
+
         */
 
 
@@ -59,12 +61,44 @@ public class ListViewActivity extends Activity {
             case dist:
 
                 /* need a sorting algorithm
+                    1)get all the artworks (sorted by latitude)
+                    2)create variables
+                    3)get data for each
+                    4)sort (at insertion or after?)
+                        Cursor c = dbh.listeTable(DBHelper.TABLE_OEUVRES, DBHelper.O_COORD_LAT);
+
+                        arrayList<[]> works; //check declaration
+                        String art_name;
+                        String art_lati;
+                        String art_longi;
+                        String art_state;
+
+                        String lati_dist;
+                        string longi_dist;
+                        String total_dist;
+
+                        c.moveToFirst();
+                        while (!c.isAfterLast()) {
+                            art_name = c.getString(c.getColumnIndex(DBHelper.O_TITRE));
+                            art_lati = c.getString(c.getColumnIndex(DBHelper.O_COORD_LAT);
+                            art_longi = c.getString(c.getColumnIndex(DBHelper.O_COORD_LONG);
+                            art_state = c.getString(c.getColumnIndex(DBHelper.O_ETAT);
+
+                            lati_dist = (user_lati - art_lati).toNonNegative() // find function
+                            longi_dist = (user_longi - art_longi)
+
+                            total_dist = lati_dist + longi_dist;
+
+                            ???? sorting and which type to use
+                        }
+
 
                     |artWork[i].lati-myPos.lati| = distance[i].lati
                     |artWork[i]-longi - myPos-longi| = distance[i]. longi
                     totalDistance[i] = distance[i].lati + distance[i].longi
 
                     Sort the array of totalDistances in order to show them by distance to user
+                    How to transfer this array into the sca?!
                 */
         /*
 
@@ -77,7 +111,7 @@ public class ListViewActivity extends Activity {
                     SimpleCursorAdapter sca = new ListViewCursorAdaptor(this, android.R.layout.simple_list_item_2, c, from, to, 0,dbh);
                  break;
 
-            //Is there another case? by name or will that be replaced by search query
+            //Is there another case? by name? or will that be replaced by search query?
 
         */
 
