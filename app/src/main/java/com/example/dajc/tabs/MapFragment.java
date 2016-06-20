@@ -261,15 +261,17 @@ public class MapFragment extends Fragment implements LocationListener, View.OnCl
         switch (v.getId()) {
             case R.id.button_listView:
                 Intent intent = new Intent(getActivity(), ListViewActivity.class);
+                String longi_s;
+                String lati_s;
                 if (myLocation != null) {
-                    String longi = "" + myLocation.getLongitude();
-                    String lati = "" + myLocation.getLatitude();
+                    longi_s = "" + myLocation.getLongitude();
+                    lati_s = "" + myLocation.getLatitude();
                 } else {
-                    String longi = "";
-                    String lati = "";
+                    longi_s = "";
+                    lati_s = "";
                 }
-                intent.putExtra("Geo_longi", longi);
-                intent.putExtra("Geo_lati", lati);
+                intent.putExtra("Geo_longi", longi_s);
+                intent.putExtra("Geo_lati", lati_s);
                 startActivity(intent);
                 break;
             case R.id.button_location:
