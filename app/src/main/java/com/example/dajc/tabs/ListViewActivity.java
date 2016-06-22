@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 /**
  * Created by DAJC on 2016-04-21.
@@ -39,12 +40,16 @@ public class ListViewActivity extends Activity {
         Log.d("ListView gps", "Latitude utilisateur = " + user_lati);
 
         //set View
-        setContentView(R.layout.listview);
+        setContentView(R.layout.listview_tri);
         ListView lv = (ListView)findViewById(R.id.listView);
 
         rb_dist = (RadioButton) findViewById(R.id.rb_distance);
         rb_quart = (RadioButton) findViewById(R.id.rb_quartier);
 
+        if (user_longi.contentEquals("")){
+            Toast.makeText(getApplicationContext(), "Activer le GPS pour le tri par distance", Toast.LENGTH_LONG).show();
+            rb_quart.setChecked(true);
+        }
 
         /*
                Need to set up the RadioButtons!
