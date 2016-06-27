@@ -32,7 +32,6 @@ import java.util.Date;
 public class FicheFragment extends Fragment implements View.OnClickListener {
 
     static final int REQUEST_IMAGE_PICTURE = 1;
-
     String numOeuvre;
     String etat_o;
     DBHelper dbh;
@@ -49,7 +48,6 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
 
     public FicheFragment (){
         this.dbh = FirstActivity.getDBH();
-        this.numOeuvre = "1999-SC-04";
 
     }
     @Nullable
@@ -67,12 +65,15 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         cam_b = (ImageButton) v.findViewById(R.id.button_cam);
         date_ajout = (TextView) v.findViewById(R.id.tv_date);
 
+        //randomizes between works that are neither favorites nor in gallery
+        Cursor c = dbh.listeTableOrd(dbh.TABLE_OEUVRES, dbh.O_ETAT, dbh.ETAT_NORMAL, "random()");
 
-        Cursor c = dbh.retourneOeuvre(numOeuvre);
         c.moveToFirst();
+
 
         //récupère les données dans c;
         String titre_o = c.getString(c.getColumnIndex(DBHelper.O_TITRE));
+        numOeuvre = c.getString (c.getColumnIndex(DBHelper.O_ID));
         String tech_nbr = c.getString(c.getColumnIndex(DBHelper.O_TECHNIQUE));
         String cat_nbr = c.getString(c.getColumnIndex(DBHelper.O_CATEGORIE));
         String quart_nbr = c.getString(c.getColumnIndex(DBHelper.O_QUARTIER));
@@ -83,20 +84,7 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         etat_o = c.getString(c.getColumnIndex(DBHelper.O_ETAT));
         c.close();
 
-        /*
 
-        OeuvreExemple db = new OeuvreExemple("Source","Coutu","Patrick","549 x 466 x 466 cm","Bronze coulÃ©; boulonnÃ©","CÃ´te-des-Neigesâ€“Notre-Dame-de-GrÃ¢ce","Sculpture","https://upload.wikimedia.org/wikipedia/commons/d/d2/Mo%C3%A1is.jpg");
-        String titre_o = db.titre;
-        String tech_nbr = db.technique;
-        String cat_nbr = db.type;
-        String quart_nbr = db.quartier;
-        String mat_nbr = "(inconnu)";
-        String dimension_o = db.dimension;
-        String uri_photo = dbh.URI_DEF;
-        String date_oeuvre = "inconnue";
-        etat_o = dbh.ETAT_NORMAL;
-
-        */
 
         //set title
         title.setText(titre_o);
