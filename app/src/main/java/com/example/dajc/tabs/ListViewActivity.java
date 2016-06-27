@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleCursorAdapter;
@@ -13,7 +15,7 @@ import android.widget.Toast;
 /**
  * Created by DAJC on 2016-04-21.
  */
-public class ListViewActivity extends Activity {
+public class ListViewActivity extends Activity implements AdapterView.OnItemClickListener {
 
     DBHelper dbh;
 
@@ -21,6 +23,7 @@ public class ListViewActivity extends Activity {
     String user_lati;
     RadioButton rb_dist;
     RadioButton rb_quart;
+    Cursor c;
 
     public ListViewActivity(){
         this.dbh = FirstActivity.getDBH();
@@ -43,6 +46,8 @@ public class ListViewActivity extends Activity {
         setContentView(R.layout.listview_tri);
         ListView lv = (ListView)findViewById(R.id.listView);
 
+        lv.setOnItemClickListener(this);
+
         rb_dist = (RadioButton) findViewById(R.id.rb_distance);
         rb_quart = (RadioButton) findViewById(R.id.rb_quartier);
 
@@ -51,13 +56,7 @@ public class ListViewActivity extends Activity {
             rb_quart.setChecked(true);
         }
 
-        /*
-               Need to set up the RadioButtons!
 
-               By default, have distance set.
-                    if the person doesn't have location active, notify and set by neighbourhood
-
-        */
 
 
 
@@ -125,7 +124,7 @@ public class ListViewActivity extends Activity {
 
 
         //shows them all by area
-        Cursor c = dbh.listeTable(DBHelper.TABLE_OEUVRES, DBHelper.O_QUARTIER);
+        c = dbh.listeTable(DBHelper.TABLE_OEUVRES, DBHelper.O_QUARTIER);
         String[] from ={ DBHelper.O_ID, DBHelper.O_TITRE, DBHelper.O_DIMENSION };
         int[] to = {0, android.R.id.text1, android.R.id.text2};
         SimpleCursorAdapter sca = new ListViewCursorAdaptor(this, android.R.layout.simple_list_item_2, c, from, to, 0,dbh);
@@ -135,4 +134,14 @@ public class ListViewActivity extends Activity {
     }
 
 
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d("onItemClick", "item was clicked "+position);
+        c.moveToPosition(position);
+        String numOeuvre = c.getString(c.getColumnIndex(dbh.O_ID));
+        Intent intent= new Intent(this, FicheActivity.class);
+        intent.putExtra("numOeuvre", numOeuvre);
+        startActivity(intent);
+    }
 }

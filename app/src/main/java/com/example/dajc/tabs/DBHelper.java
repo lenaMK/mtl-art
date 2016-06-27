@@ -11,9 +11,7 @@ import android.util.Log;
 import com.example.dajc.tabs.WebAPI.Artiste;
 import com.example.dajc.tabs.WebAPI.Oeuvre;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -656,8 +654,15 @@ public class DBHelper extends SQLiteOpenHelper {
         c.moveToFirst();
 
         String date = c.getString(c.getColumnIndex(DBHelper.O_DATE_IMAGE));
+        //Log.d("date", "string is "+date);
 
         //ajuste le format de date à un format "humain" jour mois année
+
+        String annee = date.substring(0, 4);
+        String mois = date.substring (4, 6);
+        String jour = date.substring(6, 8);
+
+        /*
         String short_date = date.substring(6, date.length() - 7);
 
         long dv = Long.valueOf(short_date);//
@@ -666,7 +671,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String jour = new SimpleDateFormat("dd").format(df);
         String mois = new SimpleDateFormat("MM").format(df);
         String annee = new SimpleDateFormat("yyyy").format(df);
-
+        */
         switch (mois){
 
             case "01":

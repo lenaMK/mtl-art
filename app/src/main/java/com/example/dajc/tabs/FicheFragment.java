@@ -194,6 +194,9 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
                 imageBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fout);
 
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
+                //Log.d("photo", "dateTime stamp is "+timeStamp);
+
                 dbh.ajoutePhoto(numOeuvre, currentPath, timeStamp);
                 dbh.changeEtat(numOeuvre, dbh.ETAT_GALERIE);
 

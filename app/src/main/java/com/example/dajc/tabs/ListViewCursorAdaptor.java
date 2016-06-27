@@ -56,6 +56,7 @@ public class ListViewCursorAdaptor extends SimpleCursorAdapter {
         String num_quartier = c.getString(c.getColumnIndex(dbh.O_QUARTIER));
         String quartier = dbh.retourneNom(dbh.TABLE_QUARTIERS, dbh.Q_ID, num_quartier, dbh.Q_NOM);
 
+
         //montrer la date de la photo, plutôt pour la galerie qu'ici
         //final String date = c.getString(c.getColumnIndex(dbh.O_DATE_IMAGE));
 

@@ -3,6 +3,7 @@
     android:orientation="horizontal" android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
+    android:descendantFocusability="blocksDescendants"
     android:gravity="center_vertical">
 
     <LinearLayout
@@ -12,7 +13,9 @@
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="0dp"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp">
+        android:layout_marginTop="0dp"
+
+        android:id="@+id/layout_rangee">
 
         <TextView
             android:layout_width="match_parent"
