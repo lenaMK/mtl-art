@@ -26,11 +26,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapActivity" />
-        <activity android:name=".FicheActivity"/>
+        <activity android:name=".FicheActivity"
+            android:windowSoftInputMode="stateHidden"/>
         <activity android:name=".ListViewActivity"/>
         <activity android:name=".PreferencesActivity"/>
         <activity android:name=".MainActivity"/>
         <activity android:name=".InfoActivity"/>
+        <activity android:name=".PhotoActivity"
+            android:windowSoftInputMode="stateHidden"/>
 
     </application>
 

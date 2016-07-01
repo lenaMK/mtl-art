@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -48,6 +49,7 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     ImageButton cam_b;
     String lastUpdate;
     String today;
+    EditText userC;
 
     Cursor c;
 
@@ -65,10 +67,11 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     String cat_oeuvre ;
     String quart_oeuvre;
     String mat_oeuvre;
+   // String user_comment;
 
     String idDuJour;
 
-    int update = 1;
+
 
     public FicheFragment (){
         this.dbh = FirstActivity.getDBH();
@@ -90,6 +93,8 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         map_b = (ImageButton) v.findViewById(R.id.button_map);
         cam_b = (ImageButton) v.findViewById(R.id.button_cam);
         date_ajout = (TextView) v.findViewById(R.id.tv_date);
+        userC = (EditText) v.findViewById(R.id.user_comment);
+
 
         //randomizes between works that are neither favorites nor in gallery, 1/day
         SharedPreferences  settings = getActivity().getSharedPreferences("firstRun", Context.MODE_PRIVATE);
@@ -131,10 +136,15 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
             }
         } else {
             //we need a new prey, let's get it
-            c = dbh.listeTableOrd(dbh.TABLE_OEUVRES, dbh.O_ETAT, dbh.ETAT_NORMAL, "random()");
-            c.moveToFirst();
-            String newId = c.getString(c.getColumnIndex(DBHelper.O_ID));
-            c.close();
+            String newId;
+            do{
+                c = dbh.listeTableOrd(dbh.TABLE_OEUVRES, dbh.O_ETAT, dbh.ETAT_NORMAL, "random()");
+                c.moveToFirst();
+                newId = c.getString(c.getColumnIndex(DBHelper.O_ID));
+                c.close();
+            } while (newId == settings.getString("idDuJour", "notSet"));
+            //just to be sure it's not the same as yesterday
+
 
             //update the Preferences
             SharedPreferences.Editor editor = settings.edit() ;
@@ -182,12 +192,19 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
             fav_b.setVisibility(fav_b.GONE);
             cam_b.setVisibility(cam_b.GONE);
 
+
             //date de la photo de l'utilisateur
             String date_photo = dbh.retourneDatephoto(numOeuvre);
             date_ajout.setText("photo du " + date_photo);
+
+            //clickListener pour agrandir la photo
+            photo.setOnClickListener(this);
+
         } else {
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_passive);
             date_ajout.setVisibility(date_ajout.GONE);
+
+            userC.setVisibility(userC.GONE);
         }
 
 
@@ -195,6 +212,7 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         fav_b.setOnClickListener(this);
         cam_b.setOnClickListener(this);
         map_b.setOnClickListener(this);
+
         return v;
     }
 
@@ -313,7 +331,13 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                 startActivityForResult(intent, REQUEST_IMAGE_PICTURE);
+                break;
 
+            case R.id.photo:
+                intent = new Intent (getActivity(), PhotoActivity.class);
+                intent.putExtra("numOeuvre", numOeuvre);
+                startActivity(intent);
+                break;
         }
     }
 

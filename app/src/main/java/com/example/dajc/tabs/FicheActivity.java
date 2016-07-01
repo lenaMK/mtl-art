@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +41,7 @@ public class FicheActivity extends Activity implements View.OnClickListener {
     ImageButton fav_b;
     ImageButton map_b;
     ImageButton cam_b;
+    EditText user_c;
 
     String numOeuvre;
 
@@ -66,6 +68,7 @@ public class FicheActivity extends Activity implements View.OnClickListener {
         map_b = (ImageButton) findViewById(R.id.button_map);
         cam_b = (ImageButton) findViewById(R.id.button_cam);
         date_ajout = (TextView) findViewById(R.id.tv_date);
+        user_c = (EditText) findViewById(R.id.user_comment);
 
         Intent intent = getIntent();
         numOeuvre = intent.getStringExtra("numOeuvre");
@@ -136,15 +139,22 @@ public class FicheActivity extends Activity implements View.OnClickListener {
             //date de la photo de l'utilisateur
             String date_photo = dbh.retourneDatephoto(numOeuvre);
             date_ajout.setText("photo du " + date_photo);
+
+            //click listener pour agrandir la photo
+            photo.setOnClickListener(this);
+
+
         } else {
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_passive);
             date_ajout.setVisibility(date_ajout.GONE);
+            user_c.setVisibility(user_c.GONE);
         }
 
 
         fav_b.setOnClickListener(this);
         cam_b.setOnClickListener(this);
         map_b.setOnClickListener(this);
+
 
     }
 
@@ -233,7 +243,12 @@ public class FicheActivity extends Activity implements View.OnClickListener {
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                 startActivityForResult(intent, REQUEST_IMAGE_PICTURE);
-
+                break;
+            case R.id.photo:
+                intent = new Intent (this, PhotoActivity.class);
+                intent.putExtra("numOeuvre", numOeuvre);
+                startActivity(intent);
+                break;
         }
     }
 }
