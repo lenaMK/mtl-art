@@ -1,13 +1,14 @@
 package com.example.dajc.tabs;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,12 +46,37 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     ImageButton fav_b;
     ImageButton map_b;
     ImageButton cam_b;
+    String lastUpdate;
+    String today;
+
+    Cursor c;
+
+    String titre_o;
+    String tech_nbr;
+    String cat_nbr;
+    String quart_nbr ;
+    String mat_nbr ;
+    String dimension_o ;
+    String uri_photo ;
+    String date_oeuvre;
+    String o_artistes;
+    String dimension;
+    String tech_oeuvre ;
+    String cat_oeuvre ;
+    String quart_oeuvre;
+    String mat_oeuvre;
+
+    String idDuJour;
+
+    int update = 1;
 
     public FicheFragment (){
         this.dbh = FirstActivity.getDBH();
-
+        today = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        Log.d("settings", " today = "+today);
     }
-    @Nullable
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fiche, container, false);
@@ -65,52 +91,72 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         cam_b = (ImageButton) v.findViewById(R.id.button_cam);
         date_ajout = (TextView) v.findViewById(R.id.tv_date);
 
-        //randomizes between works that are neither favorites nor in gallery
-        Cursor c = dbh.listeTableOrd(dbh.TABLE_OEUVRES, dbh.O_ETAT, dbh.ETAT_NORMAL, "random()");
+        //randomizes between works that are neither favorites nor in gallery, 1/day
+        SharedPreferences  settings = getActivity().getSharedPreferences("firstRun", Context.MODE_PRIVATE);
+        if (settings.getBoolean("isFirstRun", true)) {
+            //on first use, get a first prey of the day
 
-        c.moveToFirst();
+            c = dbh.listeTableOrd(dbh.TABLE_OEUVRES, dbh.O_ETAT, dbh.ETAT_NORMAL, "random()");
+            c.moveToFirst();
+            idDuJour = c.getString(c.getColumnIndex(DBHelper.O_ID));
+            c.close();
+
+            //create a first lastUpdate
+            lastUpdate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+
+            //update the shared prefs
+
+            SharedPreferences.Editor editor = settings.edit() ;
+            editor.putBoolean("isFirstRun", false);
+            editor.putString("lastUpdate", lastUpdate);
+            editor.putString("idDuJour", idDuJour);
+            editor.commit();
+
+        }
+
+        //lastUpdate should be set on the first run and always be active after
+        String lastU = settings.getString("lastUpdate", "notSet");
+
+        if (lastU.equals("notSet")){
+            //no last update
+            Log.d("settings", "Houston we have a problem");
+        }
+        else if (lastU.equals(today)){
+            //we have a prey of the day, let's load it
+            String todayId = settings.getString("idDuJour", "notSet");
+            if (todayId.equals("notSet")){
+                Log.d("settings", "Houston we have another problem");
+            } else {
+                loadFiche(todayId);
+            }
+        } else {
+            //we need a new prey, let's get it
+            c = dbh.listeTableOrd(dbh.TABLE_OEUVRES, dbh.O_ETAT, dbh.ETAT_NORMAL, "random()");
+            c.moveToFirst();
+            String newId = c.getString(c.getColumnIndex(DBHelper.O_ID));
+            c.close();
+
+            //update the Preferences
+            SharedPreferences.Editor editor = settings.edit() ;
+            String newLastU = new SimpleDateFormat("yyyyMMdd").format(new Date());
+            editor.putString("lastUpdate", newLastU);
+            editor.putString("idDuJour", newId);
+            editor.commit();
+
+            //load it
+            loadFiche(newId);
+
+        }
 
 
-        //récupère les données dans c;
-        String titre_o = c.getString(c.getColumnIndex(DBHelper.O_TITRE));
-        numOeuvre = c.getString (c.getColumnIndex(DBHelper.O_ID));
-        String tech_nbr = c.getString(c.getColumnIndex(DBHelper.O_TECHNIQUE));
-        String cat_nbr = c.getString(c.getColumnIndex(DBHelper.O_CATEGORIE));
-        String quart_nbr = c.getString(c.getColumnIndex(DBHelper.O_QUARTIER));
-        String mat_nbr = c.getString(c.getColumnIndex(DBHelper.O_MATERIAU));
-        String dimension_o = c.getString(c.getColumnIndex(DBHelper.O_DIMENSION));
-        String uri_photo = c.getString(c.getColumnIndex(DBHelper.O_URI_IMAGE));
-        String date_oeuvre = c.getString(c.getColumnIndex(DBHelper.O_DATE_PROD));
-        etat_o = c.getString(c.getColumnIndex(DBHelper.O_ETAT));
-        c.close();
-
-
-
-        //set title
+        //set content
         title.setText(titre_o);
-
-
-        //set artist(s) name(s)
-        String o_artistes=dbh.retourneNomsArtistes(numOeuvre);
         author.setText(o_artistes);
-
-        //date de la photo
         date.setText(date_oeuvre);
 
-        //dimensions de l'oeuvre
-        String dimension = dimension_o;
-
-        //technique
-
-        String tech_oeuvre = dbh.retourneNom(DBHelper.TABLE_TECHNIQUES, DBHelper.T_ID, tech_nbr, DBHelper.T_NOM );
-        String cat_oeuvre = dbh.retourneNom(DBHelper.TABLE_CATEGORIES, DBHelper.C_ID, cat_nbr, DBHelper.C_NOM);
-        String quart_oeuvre = dbh.retourneNom(DBHelper.TABLE_QUARTIERS, DBHelper.Q_ID, quart_nbr, DBHelper.Q_NOM);
-        String mat_oeuvre = dbh.retourneNom(DBHelper.TABLE_MATERIAUX, DBHelper.M_ID, mat_nbr, DBHelper.M_NOM);
-
-
-        String information = "Quartier: " + quart_oeuvre +  "\n" + "Dimensions: " + dimension + "\n"
+        String information = "Quartier: " + quart_oeuvre + "\n" + "Dimensions: " + dimension + "\n"
                 + "Catégorie: " + cat_oeuvre + "\n" + "Technique: " + tech_oeuvre + "\n"
-                 + "Matériau: " + mat_oeuvre ;
+                + "Matériau: " + mat_oeuvre;
         infos.setText(information);
 
         //image de l'oeuvre ou par défaut
@@ -123,15 +169,14 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         }
 
 
-
         //si l'oeuvre est dans les favoris, le bouton n'est "pas actif" donc blanc
-        if(etat_o.equals(dbh.ETAT_FAVORIS)){
+        if (etat_o.equals(dbh.ETAT_FAVORIS)) {
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_active);
             date_ajout.setVisibility(date_ajout.GONE);
         }
         //si l'oeuvre est dans la galerie, on ne peut pas prendre de photo ou l'ajouter aux favoris
         //par contre, on affiche la date à laquelle la photo a été prise
-        else if (etat_o.equals(dbh.ETAT_GALERIE)){
+        else if (etat_o.equals(dbh.ETAT_GALERIE)) {
 
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_passive);
             fav_b.setVisibility(fav_b.GONE);
@@ -139,9 +184,8 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
 
             //date de la photo de l'utilisateur
             String date_photo = dbh.retourneDatephoto(numOeuvre);
-            date_ajout.setText("photo du "+date_photo);
-        }
-        else{
+            date_ajout.setText("photo du " + date_photo);
+        } else {
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_passive);
             date_ajout.setVisibility(date_ajout.GONE);
         }
@@ -154,6 +198,35 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         return v;
     }
 
+    public void loadFiche(String id) {
+        //get content for the Fiche
+
+        Cursor c = dbh.retourneOeuvre(id);
+        c.moveToFirst();
+        //récupère les données dans c;
+        titre_o = c.getString(c.getColumnIndex(DBHelper.O_TITRE));
+        numOeuvre = c.getString(c.getColumnIndex(DBHelper.O_ID));
+        tech_nbr = c.getString(c.getColumnIndex(DBHelper.O_TECHNIQUE));
+        cat_nbr = c.getString(c.getColumnIndex(DBHelper.O_CATEGORIE));
+        quart_nbr = c.getString(c.getColumnIndex(DBHelper.O_QUARTIER));
+        mat_nbr = c.getString(c.getColumnIndex(DBHelper.O_MATERIAU));
+        dimension_o = c.getString(c.getColumnIndex(DBHelper.O_DIMENSION));
+        uri_photo = c.getString(c.getColumnIndex(DBHelper.O_URI_IMAGE));
+        date_oeuvre = c.getString(c.getColumnIndex(DBHelper.O_DATE_PROD));
+        etat_o = c.getString(c.getColumnIndex(DBHelper.O_ETAT));
+
+
+        o_artistes = dbh.retourneNomsArtistes(numOeuvre);
+        dimension = dimension_o;
+
+        tech_oeuvre = dbh.retourneNom(DBHelper.TABLE_TECHNIQUES, DBHelper.T_ID, tech_nbr, DBHelper.T_NOM);
+        cat_oeuvre = dbh.retourneNom(DBHelper.TABLE_CATEGORIES, DBHelper.C_ID, cat_nbr, DBHelper.C_NOM);
+        quart_oeuvre = dbh.retourneNom(DBHelper.TABLE_QUARTIERS, DBHelper.Q_ID, quart_nbr, DBHelper.Q_NOM);
+        mat_oeuvre = dbh.retourneNom(DBHelper.TABLE_MATERIAUX, DBHelper.M_ID, mat_nbr, DBHelper.M_NOM);
+
+        c.close();
+
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -243,4 +316,5 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
 
         }
     }
+
 }

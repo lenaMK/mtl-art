@@ -476,7 +476,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         c = db.rawQuery("select * from "+TABLE_OEUVRES+" where "+O_ID+" = '"+numOeuvre+"' ", null);
         int nombre = c.getCount();
-        Log.d("sql", "requete pour oeuvre " + numOeuvre + " has " + nombre + " results");
+
         return c;
     }
 

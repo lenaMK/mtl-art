@@ -1,5 +1,6 @@
 package com.example.dajc.tabs;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -9,8 +10,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,35 +21,26 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     TabLayout tabLayout;
-    //NonSwipeableViewPager pager;
     ViewPager pager;
+    //CustomViewPager pager;
 
     public final int nb = 4;
-
-
-
-
-    /*
-    static DBHelper dbh;
-    public static DBHelper getDBH() {
-        return dbh;
-    }*/
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //dbh = new DBHelper(this);
+
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
-        //pager = (NonSwipeableViewPager) findViewById(R.id.pager);
-        pager = (ViewPager)findViewById(R.id.pager);
+        pager = (ViewPager) findViewById(R.id.pager);
+        //custom pager without swiping
+            //pager = (CustomViewPager)findViewById(R.id.pager);
+            //pager.setPagingEnabled(false);
+
 
         PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
-
         pager.setAdapter(pagerAdapter);
-
 
         tabLayout.setupWithViewPager(pager);
 
@@ -216,5 +210,33 @@ public class MainActivity extends AppCompatActivity {
         public void onPageScrollStateChanged(int state) {
 
         }
+    }
+
+    public class CustomViewPager extends android.support.v4.view.ViewPager{
+        private boolean enabled;
+
+        public CustomViewPager(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            this.enabled = true;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            return enabled ? super.onTouchEvent(event) : false;
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent event) {
+            return enabled ? super.onInterceptTouchEvent(event) : false;
+        }
+
+        public void setPagingEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean isPagingEnabled() {
+            return enabled;
+        }
+
     }
 }

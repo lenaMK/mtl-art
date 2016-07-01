@@ -9,8 +9,11 @@ import android.widget.Toast;
 /**
  * Created by LenaMK on 07/03/2016.
  */
+
+
 public class PreferencesActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
+    String firstRun;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +24,7 @@ public class PreferencesActivity extends PreferenceActivity
                 .registerOnSharedPreferenceChangeListener(this);
 
     }
+
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
