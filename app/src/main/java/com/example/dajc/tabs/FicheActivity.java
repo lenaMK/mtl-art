@@ -8,11 +8,14 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,11 +45,17 @@ public class FicheActivity extends Activity implements View.OnClickListener {
     ImageButton map_b;
     ImageButton cam_b;
     EditText user_c;
+    RatingBar ratingBar;
 
     String numOeuvre;
 
     String etat_o;
     String id;
+    String user_comment;
+    int user_rating;
+
+    Boolean changesComment;
+    Boolean changesRating;
 
 
     public FicheActivity() {
@@ -69,6 +78,7 @@ public class FicheActivity extends Activity implements View.OnClickListener {
         cam_b = (ImageButton) findViewById(R.id.button_cam);
         date_ajout = (TextView) findViewById(R.id.tv_date);
         user_c = (EditText) findViewById(R.id.user_comment);
+        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
 
         Intent intent = getIntent();
         numOeuvre = intent.getStringExtra("numOeuvre");
@@ -85,6 +95,8 @@ public class FicheActivity extends Activity implements View.OnClickListener {
         String dimension_o = c.getString(c.getColumnIndex(DBHelper.O_DIMENSION));
         String uri_photo = c.getString(c.getColumnIndex(DBHelper.O_URI_IMAGE));
         String date_oeuvre = c.getString(c.getColumnIndex(DBHelper.O_DATE_PROD));
+        user_comment = c.getString(c.getColumnIndex(DBHelper.O_COMMENT));
+        user_rating = c.getInt(c.getColumnIndex(DBHelper.O_RATING));
         etat_o = c.getString(c.getColumnIndex(DBHelper.O_ETAT));
         c.close();
         //set title
@@ -143,17 +155,53 @@ public class FicheActivity extends Activity implements View.OnClickListener {
             //click listener pour agrandir la photo
             photo.setOnClickListener(this);
 
+            if (! user_comment.equals("")){
+                user_c.setText(user_comment);
+            }
+            if (user_rating != 0) {
+                ratingBar.setRating((float) user_rating);
+            }
+
 
         } else {
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_passive);
             date_ajout.setVisibility(date_ajout.GONE);
             user_c.setVisibility(user_c.GONE);
+            ratingBar.setVisibility(ratingBar.GONE);
         }
 
+        changesComment = false;
+        changesRating = false;
 
         fav_b.setOnClickListener(this);
         cam_b.setOnClickListener(this);
         map_b.setOnClickListener(this);
+        ratingBar.setOnClickListener(this);
+
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            public void onRatingChanged(RatingBar ratingBar, float rating,
+                                        boolean fromUser) {
+                changesRating = true;
+            }
+        });
+
+        user_c.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                changesComment = true;
+            }
+        });
 
 
     }
@@ -249,6 +297,72 @@ public class FicheActivity extends Activity implements View.OnClickListener {
                 intent.putExtra("numOeuvre", numOeuvre);
                 startActivity(intent);
                 break;
+
+            case R.id.ratingBar:
+                Toast.makeText(getApplicationContext(),
+                        String.valueOf(ratingBar.getRating()),
+                        Toast.LENGTH_SHORT).show();
         }
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (changesComment) {
+            String comment = String.valueOf(user_c.getText());
+
+            //add modified value to DB
+            dbh.ajouteComment(numOeuvre, comment);
+            changesComment= false;
+        }
+
+        if(changesRating){
+            int rating = (int) ratingBar.getRating();
+            //add modified value to DB
+            dbh.ajouteRating(numOeuvre, rating);
+            changesRating = false;
+        }
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (changesComment) {
+            String comment = String.valueOf(user_c.getText());
+
+            //add modified value to DB
+            dbh.ajouteComment(numOeuvre, comment);
+            changesComment= false;
+        }
+
+        if(changesRating){
+            int rating = (int) ratingBar.getRating();
+            //add modified value to DB
+            dbh.ajouteRating(numOeuvre, rating);
+            changesRating = false;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (changesComment) {
+            String comment = String.valueOf(user_c.getText());
+
+            //add modified value to DB
+            dbh.ajouteComment(numOeuvre, comment);
+            changesComment= false;
+        }
+
+        if(changesRating){
+            int rating = (int) ratingBar.getRating();
+            //add modified value to DB
+            dbh.ajouteRating(numOeuvre, rating);
+            changesRating = false;
+        }
+
     }
 }

@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPageScrollStateChanged(int state) {
-
+            notifyDataSetChanged();
         }
     }
 
@@ -239,4 +239,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+
 }

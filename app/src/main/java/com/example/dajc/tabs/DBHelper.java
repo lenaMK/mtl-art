@@ -20,7 +20,7 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper {
 
     static final String DB_NAME = "art_mtl.db";
-    static final int DB_VERSION = 21;
+    static final int DB_VERSION = 22;
 
     //structure des tables
     //nom des tables
@@ -48,6 +48,8 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String O_TECHNIQUE ="technique";
     static final String O_CATEGORIE ="categorie";
     static final String O_DATE_PROD = "date_production";
+    static final String O_COMMENT = "commentaire";
+    static final String O_RATING = "rating";
 
     //table artistes
     static final String A_ID ="_id";
@@ -82,6 +84,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //uri par défaut
     static final String URI_DEF="http://www-ens.iro.umontreal.ca/~krausele/emptyImage.png";
+
+    //rating par défaut
+    static final int RATING_DEF = 0;
 
     // ouvrir un seul db pour tous les fragments/activités...
     private static SQLiteDatabase db = null;
@@ -175,6 +180,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 +O_TECHNIQUE+" text, "
                 +O_CATEGORIE+" text, "
                 +O_DATE_PROD+" text, "
+                +O_COMMENT+" text, "
+                +O_RATING+" number, "
                 +"CONSTRAINT "+O_QUARTIER+"_FK foreign key ("+O_QUARTIER+
                 ") references "+TABLE_QUARTIERS+"("+Q_ID+"), "
 
@@ -407,6 +414,8 @@ public class DBHelper extends SQLiteOpenHelper {
             cv.put(O_DATE_IMAGE, ""); //on n'a pas encore de données
             cv.put(O_ETAT, ETAT_NORMAL); //pour l'instant, c'est ok
             cv.put(O_DATE_PROD, oeuvre.DateFinProduction);
+            cv.put(O_COMMENT, "");
+            cv.put(O_RATING, RATING_DEF);
 
 
             // on entre dans les données qui sont issues de d'autres tables
@@ -480,6 +489,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return c;
     }
 
+    /*
 
     public Oeuvre retourneOeuvreComplete (String numOeuvre){
         Cursor c;
@@ -509,10 +519,13 @@ public class DBHelper extends SQLiteOpenHelper {
         // avec la méthode retourneNomsArtistes();
 
         //il faut récupérer les données pour les photos
+        //+ commentaires et rating
         c.close();
         return oeuvre;
 
     }
+
+    */
 
 
     public String retourneNom(String TABLE, String COLONNE_RECHERCHE, String valeur, String COLONNE_RESULTAT ){
@@ -636,6 +649,24 @@ public class DBHelper extends SQLiteOpenHelper {
         cv.put(O_ETAT, ETAT_GALERIE);
 
         db.update(TABLE_OEUVRES, cv, O_ID + " = '" + numOeuvre + "' ", null);
+    }
+
+    public void ajouteComment (String numOeuvre, String comment){
+        ContentValues cv = new ContentValues();
+
+        cv.put(O_COMMENT, comment);
+
+        db.update(TABLE_OEUVRES, cv, O_ID + " = '" + numOeuvre + "' ", null);
+        Log.d("sql", "comment ajouté");
+    }
+
+    public void ajouteRating (String numOeuvre, int rating){
+        ContentValues cv = new ContentValues();
+
+        cv.put(O_RATING, rating);
+
+        db.update(TABLE_OEUVRES, cv, O_ID + " = '" + numOeuvre + "' ", null);
+        Log.d("sql", "rating ajouté");
     }
 
     public String retourneURIphoto(String numOeuvre){

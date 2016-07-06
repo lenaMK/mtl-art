@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +53,7 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     String lastUpdate;
     String today;
     EditText userC;
+    RatingBar ratingBar;
 
     Cursor c;
 
@@ -67,9 +71,13 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     String cat_oeuvre ;
     String quart_oeuvre;
     String mat_oeuvre;
-   // String user_comment;
+    String user_comment;
+    int user_rating;
 
     String idDuJour;
+
+    Boolean changesComment;
+    Boolean changesRating;
 
 
 
@@ -94,10 +102,51 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         cam_b = (ImageButton) v.findViewById(R.id.button_cam);
         date_ajout = (TextView) v.findViewById(R.id.tv_date);
         userC = (EditText) v.findViewById(R.id.user_comment);
+        ratingBar = (RatingBar) v.findViewById(R.id.ratingBar);
 
+        changesComment = false;
+        changesRating = false;
+
+        fav_b.setOnClickListener(this);
+        cam_b.setOnClickListener(this);
+        map_b.setOnClickListener(this);
+        ratingBar.setOnClickListener(this);
+
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            public void onRatingChanged(RatingBar ratingBar, float rating,
+                                        boolean fromUser) {
+                    changesRating = true;
+            }
+        });
+
+
+        userC.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                changesComment = true;
+            }
+        });
+
+        return v;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         //randomizes between works that are neither favorites nor in gallery, 1/day
-        SharedPreferences  settings = getActivity().getSharedPreferences("firstRun", Context.MODE_PRIVATE);
+        SharedPreferences settings = getActivity().getSharedPreferences("firstRun", Context.MODE_PRIVATE);
         if (settings.getBoolean("isFirstRun", true)) {
             //on first use, get a first prey of the day
 
@@ -200,20 +249,19 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
             //clickListener pour agrandir la photo
             photo.setOnClickListener(this);
 
+            if (! user_comment.equals("")){
+                userC.setText(user_comment);
+            }
+            if (user_rating != 0) {
+                ratingBar.setRating((float) user_rating);
+            }
+
         } else {
             fav_b.setBackgroundResource(R.mipmap.ic_favorite_passive);
             date_ajout.setVisibility(date_ajout.GONE);
-
             userC.setVisibility(userC.GONE);
+            ratingBar.setVisibility(ratingBar.GONE);
         }
-
-
-
-        fav_b.setOnClickListener(this);
-        cam_b.setOnClickListener(this);
-        map_b.setOnClickListener(this);
-
-        return v;
     }
 
     public void loadFiche(String id) {
@@ -232,7 +280,8 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         uri_photo = c.getString(c.getColumnIndex(DBHelper.O_URI_IMAGE));
         date_oeuvre = c.getString(c.getColumnIndex(DBHelper.O_DATE_PROD));
         etat_o = c.getString(c.getColumnIndex(DBHelper.O_ETAT));
-
+        user_comment = c.getString (c.getColumnIndex(DBHelper.O_COMMENT));
+        user_rating = c.getInt(c.getColumnIndex(DBHelper.O_RATING));
 
         o_artistes = dbh.retourneNomsArtistes(numOeuvre);
         dimension = dimension_o;
@@ -338,7 +387,78 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
                 intent.putExtra("numOeuvre", numOeuvre);
                 startActivity(intent);
                 break;
+
+            case R.id.ratingBar:
+                Toast.makeText(getActivity(),
+                        String.valueOf(ratingBar.getRating()),
+                        Toast.LENGTH_SHORT).show();
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (changesComment) {
+            String comment = String.valueOf(userC.getText());
+
+            //add modified value to DB
+            dbh.ajouteComment(numOeuvre, comment);
+            changesComment= false;
+        }
+
+        if(changesRating){
+            int rating = (int) ratingBar.getRating();
+            //add modified value to DB
+            dbh.ajouteRating(numOeuvre, rating);
+            changesRating = false;
+        }
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (changesComment) {
+            String comment = String.valueOf(userC.getText());
+
+            //add modified value to DB
+            dbh.ajouteComment(numOeuvre, comment);
+            changesComment= false;
+        }
+
+        if(changesRating){
+            int rating = (int) ratingBar.getRating();
+            //add modified value to DB
+            dbh.ajouteRating(numOeuvre, rating);
+            changesRating = false;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (changesComment) {
+            String comment = String.valueOf(userC.getText());
+
+            //add modified value to DB
+            dbh.ajouteComment(numOeuvre, comment);
+            changesComment= false;
+        }
+
+        if(changesRating){
+            int rating = (int) ratingBar.getRating();
+            //add modified value to DB
+            dbh.ajouteRating(numOeuvre, rating);
+            changesRating = false;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
 }
