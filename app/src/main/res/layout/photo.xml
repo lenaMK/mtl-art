@@ -29,14 +29,32 @@
         android:layout_height="fill_parent"
         android:id="@+id/photo_view"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="25" />
+        android:layout_weight="40" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="date ajout"
-        android:id="@+id/photo_dateAjout" />
+        android:layout_weight="1.4">
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1.0"
+            android:rating="0" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="date ajout"
+            android:id="@+id/photo_dateAjout"
+            android:layout_gravity="right"
+            android:gravity="center|end" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
