@@ -1,7 +1,9 @@
 package com.example.dajc.tabs;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,8 +56,7 @@ public class FicheActivity extends Activity implements View.OnClickListener {
     String user_comment;
     int user_rating;
 
-    Boolean changesComment;
-    Boolean changesRating;
+    SharedPreferences changes;
 
 
     public FicheActivity() {
@@ -170,8 +171,7 @@ public class FicheActivity extends Activity implements View.OnClickListener {
             ratingBar.setVisibility(ratingBar.GONE);
         }
 
-        changesComment = false;
-        changesRating = false;
+        changes = getApplicationContext().getSharedPreferences("change_rating", Context.MODE_PRIVATE);
 
         fav_b.setOnClickListener(this);
         cam_b.setOnClickListener(this);
@@ -181,7 +181,9 @@ public class FicheActivity extends Activity implements View.OnClickListener {
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             public void onRatingChanged(RatingBar ratingBar, float rating,
                                         boolean fromUser) {
-                changesRating = true;
+                SharedPreferences.Editor editor = changes.edit() ;
+                editor.putBoolean("rating", true);
+                editor.commit();
             }
         });
 
@@ -199,7 +201,9 @@ public class FicheActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void afterTextChanged(Editable s) {
-                changesComment = true;
+                SharedPreferences.Editor editor = changes.edit() ;
+                editor.putBoolean("comment", true);
+                editor.commit();
             }
         });
 
@@ -308,40 +312,63 @@ public class FicheActivity extends Activity implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
 
+        Boolean changesComment;
+        Boolean changesRating;
+
+        changesComment = changes.getBoolean("comment", false);
+        changesRating = changes.getBoolean("rating", false);
+
         if (changesComment) {
             String comment = String.valueOf(user_c.getText());
 
             //add modified value to DB
             dbh.ajouteComment(numOeuvre, comment);
-            changesComment= false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("comment", false);
+            editor.commit();
         }
 
         if(changesRating){
             int rating = (int) ratingBar.getRating();
             //add modified value to DB
             dbh.ajouteRating(numOeuvre, rating);
-            changesRating = false;
-        }
 
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("rating", false);
+            editor.commit();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
+        Boolean changesComment;
+        Boolean changesRating;
+
+        changesComment = changes.getBoolean("comment", false);
+        changesRating = changes.getBoolean("rating", false);
+
         if (changesComment) {
             String comment = String.valueOf(user_c.getText());
 
             //add modified value to DB
             dbh.ajouteComment(numOeuvre, comment);
-            changesComment= false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("comment", false);
+            editor.commit();
         }
 
         if(changesRating){
             int rating = (int) ratingBar.getRating();
             //add modified value to DB
             dbh.ajouteRating(numOeuvre, rating);
-            changesRating = false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("rating", false);
+            editor.commit();
         }
     }
 
@@ -349,19 +376,31 @@ public class FicheActivity extends Activity implements View.OnClickListener {
     public void onStop() {
         super.onStop();
 
+        Boolean changesComment;
+        Boolean changesRating;
+
+        changesComment = changes.getBoolean("comment", false);
+        changesRating = changes.getBoolean("rating", false);
+
         if (changesComment) {
             String comment = String.valueOf(user_c.getText());
 
             //add modified value to DB
             dbh.ajouteComment(numOeuvre, comment);
-            changesComment= false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("comment", false);
+            editor.commit();
         }
 
         if(changesRating){
             int rating = (int) ratingBar.getRating();
             //add modified value to DB
             dbh.ajouteRating(numOeuvre, rating);
-            changesRating = false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("rating", false);
+            editor.commit();
         }
 
     }

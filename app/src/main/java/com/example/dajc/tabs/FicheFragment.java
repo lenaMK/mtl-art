@@ -76,8 +76,7 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
 
     String idDuJour;
 
-    Boolean changesComment;
-    Boolean changesRating;
+    SharedPreferences changes;
 
 
 
@@ -104,18 +103,19 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
         userC = (EditText) v.findViewById(R.id.user_comment);
         ratingBar = (RatingBar) v.findViewById(R.id.ratingBar);
 
-        changesComment = false;
-        changesRating = false;
-
         fav_b.setOnClickListener(this);
         cam_b.setOnClickListener(this);
         map_b.setOnClickListener(this);
         ratingBar.setOnClickListener(this);
 
+        changes = getActivity().getSharedPreferences("change_rating", Context.MODE_PRIVATE);
+
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             public void onRatingChanged(RatingBar ratingBar, float rating,
                                         boolean fromUser) {
-                    changesRating = true;
+                SharedPreferences.Editor editor = changes.edit() ;
+                editor.putBoolean("rating", true);
+                editor.commit();
             }
         });
 
@@ -134,8 +134,11 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void afterTextChanged(Editable s) {
-                changesComment = true;
+                SharedPreferences.Editor editor = changes.edit() ;
+                editor.putBoolean("comment", true);
+                editor.commit();
             }
+
         });
 
         return v;
@@ -399,19 +402,31 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
 
-        if (changesComment) {
+        Boolean changesComment;
+        Boolean changesRating;
+
+        changesComment = changes.getBoolean("comment", false);
+        changesRating = changes.getBoolean("rating", false);
+
+        if (changesComment== true) {
             String comment = String.valueOf(userC.getText());
 
             //add modified value to DB
             dbh.ajouteComment(numOeuvre, comment);
-            changesComment= false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("comment", false);
+            editor.commit();
         }
 
-        if(changesRating){
+        if(changesRating== true){
             int rating = (int) ratingBar.getRating();
             //add modified value to DB
             dbh.ajouteRating(numOeuvre, rating);
-            changesRating = false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("rating", false);
+            editor.commit();
         }
 
     }
@@ -420,19 +435,31 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
 
-        if (changesComment) {
+        Boolean changesComment;
+        Boolean changesRating;
+
+        changesComment = changes.getBoolean("comment", false);
+        changesRating = changes.getBoolean("rating", false);
+
+        if (changesComment == true) {
             String comment = String.valueOf(userC.getText());
 
             //add modified value to DB
             dbh.ajouteComment(numOeuvre, comment);
-            changesComment= false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("comment", false);
+            editor.commit();
         }
 
-        if(changesRating){
+        if(changesRating == true){
             int rating = (int) ratingBar.getRating();
             //add modified value to DB
             dbh.ajouteRating(numOeuvre, rating);
-            changesRating = false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("rating", false);
+            editor.commit();
         }
     }
 
@@ -440,25 +467,31 @@ public class FicheFragment extends Fragment implements View.OnClickListener {
     public void onStop() {
         super.onStop();
 
-        if (changesComment) {
+        Boolean changesComment;
+        Boolean changesRating;
+
+        changesComment = changes.getBoolean("comment", false);
+        changesRating = changes.getBoolean("rating", false);
+
+        if (changesComment == true) {
             String comment = String.valueOf(userC.getText());
 
             //add modified value to DB
             dbh.ajouteComment(numOeuvre, comment);
-            changesComment= false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("comment", false);
+            editor.commit();
         }
 
-        if(changesRating){
+        if(changesRating== true){
             int rating = (int) ratingBar.getRating();
             //add modified value to DB
             dbh.ajouteRating(numOeuvre, rating);
-            changesRating = false;
+
+            SharedPreferences.Editor editor = changes.edit() ;
+            editor.putBoolean("rating", false);
+            editor.commit();
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
     }
 }
